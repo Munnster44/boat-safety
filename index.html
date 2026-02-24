@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Boat Safety (v1)</title>
+  <meta name="theme-color" content="#0b3d91" />
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#121c2f;
+      --muted:#94a3b8;
+      --text:#e5e7eb;
+      --accent:#38bdf8;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --border:rgba(148,163,184,.22);
+      --shadow:0 12px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(56,189,248,.12), transparent 60%),
+                  radial-gradient(1000px 700px at 90% 10%, rgba(34,197,94,.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position: sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,18,32,.72);
+      border-bottom:1px solid var(--border);
+      padding: 10px 12px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      min-width: 0;
+    }
+    .logo{
+      width:38px;height:38px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(56,189,248,.95), rgba(11,61,145,.95));
+      box-shadow: var(--shadow);
+      display:grid; place-items:center;
+      font-weight:800;
+    }
+    .titlewrap{min-width:0}
+    .h1{
+      font-size:16px;
+      font-weight:800;
+      line-height:1.1;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .sub{
+      margin:2px 0 0 0;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .pillrow{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+    .pill{
+      border:1px solid var(--border);
+      background: rgba(148,163,184,.08);
+      color: var(--text);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill:active{transform: translateY(1px)}
+    .pill.primary{border-color: rgba(56,189,248,.45); background: rgba(56,189,248,.12)}
+    .pill.good{border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.10)}
+    .pill.warn{border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.10)}
+    .pill.bad{border-color: rgba(239,68,68,.50); background: rgba(239,68,68,.10)}
+    main{
+      max-width: 980px;
+      margin: 14px auto 90px;
+      padding: 0 12px;
+      display:grid;
+      gap: 12px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+    .card{
+      grid-column: span 12;
+      background: rgba(18,28,47,.88);
+      border:1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+    .card h2{
+      margin:0 0 8px 0;
+      font-size: 14px;
+      letter-spacing:.2px;
+      color: #dbeafe;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .muted{color:var(--muted); font-size:12px}
+    .bigrow{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .stat{
+      border:1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(148,163,184,.06);
+      min-height: 76px;
+    }
+    .k{font-size:11px; color:var(--muted)}
+    .v{font-size:22px; font-weight:850; margin-top:4px}
+    .v small{font-size:12px; font-weight:700; color:var(--muted)}
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(148,163,184,.08);
+      color: var(--text);
+      padding: 12px 12px;
+      border-radius: 16px;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+      min-width: 140px;
+      text-align:center;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{border-color: rgba(56,189,248,.55); background: rgba(56,189,248,.14)}
+    .btn.bad{border-color: rgba(239,68,68,.60); background: rgba(239,68,68,.14)}
+    .btn.good{border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.12)}
+    .btn.warn{border-color: rgba(245,158,11,.55); background: rgba(245,158,11,.12)}
+    .btn.small{padding:10px 10px; border-radius:14px; min-width: 120px}
+    .panel{
+      border:1px dashed rgba(148,163,184,.30);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(0,0,0,.10);
+    }
+    .two{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .kv{
+      display:grid;
+      grid-template-columns: 130px 1fr;
+      gap: 8px 10px;
+      align-items:center;
+      font-size: 12px;
+    }
+    .kv div:nth-child(odd){color:var(--muted)}
+    input[type="range"]{width: 220px}
+    .tog{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    label.switch{
+      display:flex; align-items:center; gap:8px;
+      cursor:pointer;
+      user-select:none;
+      font-size: 12px;
+      color: var(--text);
+      border:1px solid var(--border);
+      background: rgba(148,163,184,.06);
+      padding: 8px 10px;
+      border-radius: 999px;
+    }
+    label.switch input{accent-color: var(--accent)}
+    .log{
+      max-height: 220px;
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(0,0,0,.14);
+      font-size: 12px;
+    }
+    .footerbar{
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      background: rgba(11,18,32,.80);
+      border-top:1px solid var(--border);
+      padding: 10px 12px;
+      backdrop-filter: blur(10px);
+    }
+    .footerwrap{
+      max-width: 980px;
+      margin: 0 auto;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .statusDot{
+      width:10px; height:10px; border-radius: 50%;
+      background: var(--muted);
+      box-shadow: 0 0 0 4px rgba(148,163,184,.10);
+      display:inline-block;
+      margin-right:8px;
+    }
+    .statusDot.good{background: var(--good); box-shadow: 0 0 0 4px rgba(34,197,94,.12)}
+    .statusDot.warn{background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.12)}
+    .statusDot.bad{background: var(--bad); box-shadow: 0 0 0 4px rgba(239,68,68,.12)}
+    .copyright{
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (min-width: 820px){
+      .card.span6{grid-column: span 6;}
+      .card.span7{grid-column: span 7;}
+      .card.span5{grid-column: span 5;}
+      .two{grid-template-columns: 1fr 1fr;}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">⛵</div>
+      <div class="titlewrap">
+        <p class="h1" id="t_app">Boat Safety (v1)</p>
+        <p class="sub" id="t_sub">GPS • MOB • Anchor Alarm • Offline PWA</p>
+      </div>
+    </div>
+    <div class="pillrow">
+      <div class="pill primary" id="btnLang">EN</div>
+      <div class="pill" id="btnInstall" style="display:none;">Install</div>
+      <div class="pill" id="pillOffline">Offline ready</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+
+    <section class="card span7">
+      <h2>
+        <span id="t_dash">Live Dashboard</span>
+        <span class="muted" id="gpsState">—</span>
+      </h2>
+
+      <div class="bigrow">
+        <div class="stat">
+          <div class="k" id="t_speed">Speed</div>
+          <div class="v"><span id="spd">—</span> <small>kn</small></div>
+        </div>
+        <div class="stat">
+          <div class="k" id="t_course">Course (GPS)</div>
+          <div class="v"><span id="cog">—</span><small>°</small></div>
+        </div>
+        <div class="stat">
+          <div class="k" id="t_heading">Heading (Compass)</div>
+          <div class="v"><span id="hdg">—</span><small>°</small></div>
+        </div>
+        <div class="stat">
+          <div class="k" id="t_acc">Accuracy</div>
+          <div class="v"><span id="acc">—</span> <small>m</small></div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="panel">
+        <div class="row">
+          <div class="btn small primary" id="btnStartGPS">Start GPS</div>
+          <div class="btn small" id="btnStopGPS">Stop GPS</div>
+          <div class="btn small" id="btnCompass">Enable Compass</div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="kv">
+          <div id="t_lat">Latitude</div><div class="mono" id="lat">—</div>
+          <div id="t_lng">Longitude</div><div class="mono" id="lng">—</div>
+          <div id="t_time">Last fix</div><div class="mono" id="fixTime">—</div>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:8px" id="t_note_compass">
+        Compass may require permission (iPhone/iPad) and works best outdoors away from metal.
+      </div>
+    </section>
+
+    <section class="card span5">
+      <h2>
+        <span id="t_quick">Emergency / Quick Actions</span>
+        <span class="muted" id="alarmState">—</span>
+      </h2>
+
+      <div class="row">
+        <div class="btn bad" id="btnMOB">🚨 MOB (Mark)</div>
+        <div class="btn warn" id="btnClearMOB">Clear MOB</div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="panel">
+        <div class="kv">
+          <div id="t_mob_point">MOB point</div><div class="mono" id="mobPoint">—</div>
+          <div id="t_mob_dist">To MOB</div><div class="mono" id="mobDist">—</div>
+          <div id="t_mob_brg">Bearing</div><div class="mono" id="mobBrg">—</div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="row">
+        <div class="btn good" id="btnAnchorSet">⚓ Set Anchor</div>
+        <div class="btn warn" id="btnAnchorClear">Clear Anchor</div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="panel">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <div class="muted" id="t_radius">Anchor radius</div>
+          <div class="mono"><span id="radVal">50</span> m</div>
+        </div>
+        <input type="range" id="rad" min="10" max="200" step="5" value="50" />
+        <div style="height:8px"></div>
+        <div class="kv">
+          <div id="t_anchor_point">Anchor point</div><div class="mono" id="anchorPoint">—</div>
+          <div id="t_anchor_dist">Distance</div><div class="mono" id="anchorDist">—</div>
+          <div id="t_anchor_status">Status</div><div class="mono" id="anchorStatus">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card span6">
+      <h2><span id="t_settings">Settings</span><span class="muted" id="t_saved">Saved locally</span></h2>
+      <div class="tog">
+        <label class="switch"><input type="checkbox" id="setSound"> <span id="t_sound">Sound</span></label>
+        <label class="switch"><input type="checkbox" id="setVibe"> <span id="t_vibe">Vibration</span></label>
+        <label class="switch"><input type="checkbox" id="setLog"> <span id="t_log">Log events</span></label>
+      </div>
+      <div style="height:10px"></div>
+      <div class="row">
+        <div class="btn small" id="btnTestAlarm">Test Alarm</div>
+        <div class="btn small" id="btnStopAlarm">Stop Alarm</div>
+      </div>
+      <div class="muted" style="margin-top:8px" id="t_privacy">
+        Privacy: this app stores settings and your optional event log on this device only.
+      </div>
+    </section>
+
+    <section class="card span6">
+      <h2><span id="t_log_title">Event Log</span><span class="muted" id="logCount">0</span></h2>
+      <div class="row">
+        <div class="btn small primary" id="btnExport">Export CSV</div>
+        <div class="btn small warn" id="btnClearLog">Clear Log</div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="log mono" id="logBox">—</div>
+    </section>
+
+  </div>
+</main>
+
+<div class="footerbar">
+  <div class="footerwrap">
+    <div class="muted">
+      <span class="statusDot" id="dot"></span>
+      <span id="footerStatus">—</span>
+    </div>
+    <div class="copyright" id="copyright">
+      © <span id="yy"></span> Boat Safety App (v1). For training & situational awareness only.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // -----------------------------
+  // i18n
+  // -----------------------------
+  const STR = {
+    en: {
+      app: "Boat Safety (v1)",
+      sub: "GPS • MOB • Anchor Alarm • Offline PWA",
+      dash: "Live Dashboard",
+      speed: "Speed",
+      course: "Course (GPS)",
+      heading: "Heading (Compass)",
+      acc: "Accuracy",
+      lat: "Latitude",
+      lng: "Longitude",
+      time: "Last fix",
+      note_compass: "Compass may require permission (iPhone/iPad) and works best outdoors away from metal.",
+      quick: "Emergency / Quick Actions",
+      mob_point: "MOB point",
+      mob_dist: "To MOB",
+      mob_brg: "Bearing",
+      radius: "Anchor radius",
+      anchor_point: "Anchor point",
+      anchor_dist: "Distance",
+      anchor_status: "Status",
+      settings: "Settings",
+      saved: "Saved locally",
+      sound: "Sound",
+      vibe: "Vibration",
+      log: "Log events",
+      privacy: "Privacy: this app stores settings and your optional event log on this device only.",
+      log_title: "Event Log",
+      gps_start: "Start GPS",
+      gps_stop: "Stop GPS",
+      compass_enable: "Enable Compass",
+      mob_mark: "🚨 MOB (Mark)",
+      mob_clear: "Clear MOB",
+      anchor_set: "⚓ Set Anchor",
+      anchor_clear: "Clear Anchor",
+      test_alarm: "Test Alarm",
+      stop_alarm: "Stop Alarm",
+      export: "Export CSV",
+      clear_log: "Clear Log",
+      offline_ready: "Offline ready",
+      gps_wait: "Waiting for GPS…",
+      gps_running: "GPS running",
+      gps_stopped: "GPS stopped",
+      gps_denied: "GPS permission denied",
+      gps_unavailable: "GPS unavailable",
+      compass_ok: "Compass enabled",
+      compass_denied: "Compass permission denied",
+      mob_set: "MOB marked",
+      mob_cleared: "MOB cleared",
+      anchor_set_msg: "Anchor set",
+      anchor_cleared: "Anchor cleared",
+      anchor_ok: "OK",
+      anchor_alarm: "ALARM",
+      alarm_on: "Alarm ON",
+      alarm_off: "Alarm OFF",
+      log_off: "Logging off",
+      install: "Install",
+      install_hint: "Use your browser menu to Add to Home Screen if Install button is missing.",
+      footer_ok: "All systems normal",
+      footer_warn: "Attention needed",
+      footer_bad: "ALARM active",
+      for_training: "For training & situational awareness only."
+    },
+    fr: {
+      app: "Sécurité Nautique (v1)",
+      sub: "GPS • MOB • Alarme d’ancre • PWA hors ligne",
+      dash: "Tableau de bord",
+      speed: "Vitesse",
+      course: "Cap (GPS)",
+      heading: "Relèvement (Boussole)",
+      acc: "Précision",
+      lat: "Latitude",
+      lng: "Longitude",
+      time: "Dernière position",
+      note_compass: "La boussole peut demander une permission (iPhone/iPad) et fonctionne mieux dehors, loin du métal.",
+      quick: "Urgence / Actions rapides",
+      mob_point: "Point MOB",
+      mob_dist: "Vers MOB",
+      mob_brg: "Relèvement",
+      radius: "Rayon d’ancre",
+      anchor_point: "Point d’ancre",
+      anchor_dist: "Distance",
+      anchor_status: "État",
+      settings: "Réglages",
+      saved: "Enregistré localement",
+      sound: "Son",
+      vibe: "Vibration",
+      log: "Journaliser",
+      privacy: "Confidentialité : l’app conserve les réglages et le journal (optionnel) uniquement sur cet appareil.",
+      log_title: "Journal d’événements",
+      gps_start: "Démarrer GPS",
+      gps_stop: "Arrêter GPS",
+      compass_enable: "Activer boussole",
+      mob_mark: "🚨 MOB (Marquer)",
+      mob_clear: "Effacer MOB",
+      anchor_set: "⚓ Définir ancre",
+      anchor_clear: "Effacer ancre",
+      test_alarm: "Tester alarme",
+      stop_alarm: "Arrêter alarme",
+      export: "Exporter CSV",
+      clear_log: "Effacer journal",
+      offline_ready: "Hors ligne prêt",
+      gps_wait: "En attente du GPS…",
+      gps_running: "GPS actif",
+      gps_stopped: "GPS arrêté",
+      gps_denied: "Permission GPS refusée",
+      gps_unavailable: "GPS indisponible",
+      compass_ok: "Boussole activée",
+      compass_denied: "Permission boussole refusée",
+      mob_set: "MOB marqué",
+      mob_cleared: "MOB effacé",
+      anchor_set_msg: "Ancre définie",
+      anchor_cleared: "Ancre effacée",
+      anchor_ok: "OK",
+      anchor_alarm: "ALARME",
+      alarm_on: "Alarme ON",
+      alarm_off: "Alarme OFF",
+      log_off: "Journalisation désactivée",
+      install: "Installer",
+      install_hint: "Si le bouton Installer n’apparaît pas, utilisez le menu du navigateur : « Ajouter à l’écran d’accueil ».",
+      footer_ok: "Tout est normal",
+      footer_warn: "Attention requise",
+      footer_bad: "ALARME active",
+      for_training: "Pour formation et aide à la décision uniquement."
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  // -----------------------------
+  // State & storage
+  // -----------------------------
+  const LS_KEY = "boatSafety_v1";
+  const state = {
+    lang: "en",
+    watchId: null,
+    lastPos: null,
+    cog: null,
+    spdKn: null,
+    accM: null,
+    compassDeg: null,
+    mob: null,          // {lat,lng,t}
+    anchor: null,       // {lat,lng,t}
+    radiusM: 50,
+    alarmActive: false,
+    settings: { sound: true, vibe: true, log: true },
+    log: []
+  };
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data && typeof data === "object") {
+        if (data.lang) state.lang = data.lang;
+        if (data.radiusM) state.radiusM = clamp(+data.radiusM || 50, 10, 200);
+        if (data.settings) state.settings = Object.assign(state.settings, data.settings);
+        if (data.mob) state.mob = data.mob;
+        if (data.anchor) state.anchor = data.anchor;
+        if (Array.isArray(data.log)) state.log = data.log.slice(-400); // cap
+      }
+    } catch(_) {}
+  }
+
+  function save() {
+    const data = {
+      lang: state.lang,
+      radiusM: state.radiusM,
+      settings: state.settings,
+      mob: state.mob,
+      anchor: state.anchor,
+      log: state.log.slice(-400)
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  }
+
+  function logEvent(type, detail) {
+    if (!state.settings.log) return;
+    const t = new Date().toISOString();
+    const pos = state.lastPos ? { lat: state.lastPos.lat, lng: state.lastPos.lng } : null;
+    state.log.push({ t, type, detail, pos });
+    if (state.log.length > 400) state.log.shift();
+    save();
+    renderLog();
+  }
+
+  // -----------------------------
+  // Math helpers
+  // -----------------------------
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function toRad(d){ return d * Math.PI / 180; }
+  function toDeg(r){ return r * 180 / Math.PI; }
+
+  function haversineMeters(a, b){
+    const R = 6371000;
+    const dLat = toRad(b.lat - a.lat);
+    const dLon = toRad(b.lng - a.lng);
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+    const s = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+    const c = 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+    return R * c;
+  }
+
+  function bearingDeg(a, b){
+    const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+    const dLon = toRad(b.lng - a.lng);
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+    const brng = (toDeg(Math.atan2(y, x)) + 360) % 360;
+    return brng;
+  }
+
+  function fmtCoord(n){
+    if (n == null || !isFinite(n)) return "—";
+    return n.toFixed(6);
+  }
+
+  function fmtDeg(n){
+    if (n == null || !isFinite(n)) return "—";
+    return Math.round(n).toString();
+  }
+
+  function fmtKn(n){
+    if (n == null || !isFinite(n)) return "—";
+    return (Math.round(n*10)/10).toFixed(1);
+  }
+
+  function fmtM(n){
+    if (n == null || !isFinite(n)) return "—";
+    if (n < 1000) return `${Math.round(n)} m`;
+    return `${(n/1000).toFixed(2)} km`;
+  }
+
+  // -----------------------------
+  // Alarm (sound + vibration)
+  // -----------------------------
+  let audioCtx = null;
+  let alarmTimer = null;
+
+  function beepOnce(){
+    try{
+      if (!state.settings.sound) return;
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      g.gain.value = 0.0001;
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      const now = audioCtx.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+      o.stop(now + 0.26);
+    }catch(_){}
+  }
+
+  function vibratePattern(){
+    if (!state.settings.vibe) return;
+    if (navigator.vibrate) navigator.vibrate([200, 120, 200, 120, 350]);
+  }
+
+  function startAlarm(){
+    if (state.alarmActive) return;
+    state.alarmActive = true;
+    save();
+    setFooterStatus("bad");
+    $("alarmState").textContent = t("alarm_on");
+    logEvent("ALARM", "Anchor radius exceeded");
+    beepOnce(); vibratePattern();
+    alarmTimer = setInterval(() => { beepOnce(); vibratePattern(); }, 1800);
+  }
+
+  function stopAlarm(){
+    state.alarmActive = false;
+    if (alarmTimer) clearInterval(alarmTimer);
+    alarmTimer = null;
+    save();
+    updateOverallStatus();
+    $("alarmState").textContent = t("alarm_off");
+  }
+
+  // -----------------------------
+  // GPS
+  // -----------------------------
+  function startGPS(){
+    if (!navigator.geolocation){
+      $("gpsState").textContent = t("gps_unavailable");
+      setFooterStatus("warn");
+      return;
+    }
+    if (state.watchId != null) return;
+
+    $("gpsState").textContent = t("gps_wait");
+    setFooterStatus("warn");
+
+    state.watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const c = pos.coords;
+        state.lastPos = { lat: c.latitude, lng: c.longitude };
+        state.accM = c.accuracy;
+        // speed m/s -> knots
+        const spd = (c.speed == null || !isFinite(c.speed)) ? null : c.speed * 1.94384449;
+        state.spdKn = spd;
+        // course
+        state.cog = (c.heading == null || !isFinite(c.heading)) ? null : c.heading;
+
+        renderFix(pos.timestamp);
+        updateMOB();
+        updateAnchor();
+        updateOverallStatus();
+      },
+      (err) => {
+        if (err && err.code === 1) {
+          $("gpsState").textContent = t("gps_denied");
+        } else {
+          $("gpsState").textContent = t("gps_unavailable");
+        }
+        setFooterStatus("warn");
+      },
+      { enableHighAccuracy:true, maximumAge: 1000, timeout: 15000 }
+    );
+
+    $("gpsState").textContent = t("gps_running");
+    logEvent("GPS", "Started");
+  }
+
+  function stopGPS(){
+    if (state.watchId != null) {
+      navigator.geolocation.clearWatch(state.watchId);
+      state.watchId = null;
+      $("gpsState").textContent = t("gps_stopped");
+      logEvent("GPS", "Stopped");
+      updateOverallStatus();
+    }
+  }
+
+  function renderFix(ts){
+    $("lat").textContent = fmtCoord(state.lastPos?.lat);
+    $("lng").textContent = fmtCoord(state.lastPos?.lng);
+    $("acc").textContent = state.accM == null ? "—" : Math.round(state.accM).toString();
+    $("spd").textContent = fmtKn(state.spdKn);
+    $("cog").textContent = fmtDeg(state.cog);
+    $("hdg").textContent = fmtDeg(state.compassDeg);
+    $("fixTime").textContent = new Date(ts).toLocaleString();
+  }
+
+  // -----------------------------
+  // Compass / heading
+  // -----------------------------
+  function handleOrientation(ev){
+    // On iOS, webkitCompassHeading is degrees (0=N). Otherwise use alpha.
+    let heading = null;
+
+    if (typeof ev.webkitCompassHeading === "number" && isFinite(ev.webkitCompassHeading)) {
+      heading = ev.webkitCompassHeading;
+    } else if (typeof ev.alpha === "number" && isFinite(ev.alpha)) {
+      // alpha is 0 at device facing north? depends; do a basic conversion
+      heading = (360 - ev.alpha) % 360;
+    }
+
+    if (heading != null) {
+      state.compassDeg = heading;
+      $("hdg").textContent = fmtDeg(state.compassDeg);
+    }
+  }
+
+  async function enableCompass(){
+    try{
+      // iOS 13+ requires explicit permission
+      if (typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function") {
+        const res = await DeviceOrientationEvent.requestPermission();
+        if (res !== "granted") throw new Error("denied");
+      }
+      window.addEventListener("deviceorientation", handleOrientation, true);
+      $("gpsState").textContent = t("compass_ok");
+      logEvent("COMPASS", "Enabled");
+    } catch(e){
+      $("gpsState").textContent = t("compass_denied");
+      logEvent("COMPASS", "Permission denied");
+    }
+  }
+
+  // -----------------------------
+  // MOB
+  // -----------------------------
+  function setMOB(){
+    if (!state.lastPos) return;
+    state.mob = { ...state.lastPos, t: Date.now() };
+    save();
+    renderMOB();
+    logEvent("MOB", `${state.mob.lat.toFixed(6)}, ${state.mob.lng.toFixed(6)}`);
+    flash("bad");
+  }
+
+  function clearMOB(){
+    state.mob = null;
+    save();
+    renderMOB();
+    logEvent("MOB", "Cleared");
+  }
+
+  function renderMOB(){
+    if (!state.mob){
+      $("mobPoint").textContent = "—";
+      $("mobDist").textContent = "—";
+      $("mobBrg").textContent = "—";
+      return;
+    }
+    $("mobPoint").textContent = `${state.mob.lat.toFixed(6)}, ${state.mob.lng.toFixed(6)}`;
+    updateMOB();
+  }
+
+  function updateMOB(){
+    if (!state.mob || !state.lastPos) return;
+    const d = haversineMeters(state.lastPos, state.mob);
+    const b = bearingDeg(state.lastPos, state.mob);
+    $("mobDist").textContent = fmtM(d);
+    $("mobBrg").textContent = `${Math.round(b)}°`;
+  }
+
+  // -----------------------------
+  // Anchor alarm
+  // -----------------------------
+  function setAnchor(){
+    if (!state.lastPos) return;
+    state.anchor = { ...state.lastPos, t: Date.now() };
+    save();
+    renderAnchor();
+    logEvent("ANCHOR", `${state.anchor.lat.toFixed(6)}, ${state.anchor.lng.toFixed(6)} (r=${state.radiusM}m)`);
+    flash("good");
+  }
+
+  function clearAnchor(){
+    state.anchor = null;
+    save();
+    renderAnchor();
+    stopAlarm();
+    logEvent("ANCHOR", "Cleared");
+  }
+
+  function renderAnchor(){
+    if (!state.anchor){
+      $("anchorPoint").textContent = "—";
+      $("anchorDist").textContent = "—";
+      $("anchorStatus").textContent = "—";
+      return;
+    }
+    $("anchorPoint").textContent = `${state.anchor.lat.toFixed(6)}, ${state.anchor.lng.toFixed(6)}`;
+    updateAnchor();
+  }
+
+  function updateAnchor(){
+    if (!state.anchor || !state.lastPos) return;
+    const d = haversineMeters(state.lastPos, state.anchor);
+    $("anchorDist").textContent = fmtM(d);
+    const ok = d <= state.radiusM;
+    $("anchorStatus").textContent = ok ? t("anchor_ok") : t("anchor_alarm");
+    if (!ok) startAlarm();
+    if (ok && state.alarmActive) stopAlarm();
+  }
+
+  // -----------------------------
+  // UI status
+  // -----------------------------
+  function setFooterStatus(level){
+    const dot = $("dot");
+    dot.classList.remove("good","warn","bad");
+    if (level) dot.classList.add(level);
+    if (level === "good") $("footerStatus").textContent = t("footer_ok");
+    if (level === "warn") $("footerStatus").textContent = t("footer_warn");
+    if (level === "bad")  $("footerStatus").textContent = t("footer_bad");
+  }
+
+  function updateOverallStatus(){
+    // Priority: alarm > gps running w/ fix > idle
+    if (state.alarmActive) return setFooterStatus("bad");
+    if (state.watchId != null && state.lastPos) return setFooterStatus("good");
+    if (state.watchId != null && !state.lastPos) return setFooterStatus("warn");
+    return setFooterStatus("warn");
+  }
+
+  function flash(level){
+    // small visual flash of status dot
+    setFooterStatus(level === "bad" ? "bad" : (level === "good" ? "good" : "warn"));
+    setTimeout(updateOverallStatus, 700);
+  }
+
+  // -----------------------------
+  // Log UI + Export
+  // -----------------------------
+  function renderLog(){
+    $("logCount").textContent = String(state.log.length);
+    if (!state.log.length){
+      $("logBox").textContent = "—";
+      return;
+    }
+    const lines = state.log.slice().reverse().map(e => {
+      const p = e.pos ? ` @${e.pos.lat.toFixed(5)},${e.pos.lng.toFixed(5)}` : "";
+      return `${e.t} | ${e.type} | ${e.detail}${p}`;
+    });
+    $("logBox").textContent = lines.join("\n");
+  }
+
+  function exportCSV(){
+    if (!state.log.length) return;
+    const rows = [["time_iso","type","detail","lat","lng"]];
+    for (const e of state.log){
+      rows.push([
+        e.t,
+        e.type,
+        (e.detail || "").replaceAll('"','""'),
+        e.pos?.lat ?? "",
+        e.pos?.lng ?? ""
+      ]);
+    }
+    const csv = rows.map(r => r.map(v => `"${String(v)}"`).join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `boat-safety-log-${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // -----------------------------
+  // Language
+  // -----------------------------
+  function t(key){ return (STR[state.lang] && STR[state.lang][key]) || STR.en[key] || key; }
+
+  function applyLang(){
+    document.documentElement.lang = state.lang;
+    $("t_app").textContent = t("app");
+    $("t_sub").textContent = t("sub");
+    $("t_dash").textContent = t("dash");
+    $("t_speed").textContent = t("speed");
+    $("t_course").textContent = t("course");
+    $("t_heading").textContent = t("heading");
+    $("t_acc").textContent = t("acc");
+    $("t_lat").textContent = t("lat");
+    $("t_lng").textContent = t("lng");
+    $("t_time").textContent = t("time");
+    $("t_note_compass").textContent = t("note_compass");
+    $("t_quick").textContent = t("quick");
+    $("t_mob_point").textContent = t("mob_point");
+    $("t_mob_dist").textContent = t("mob_dist");
+    $("t_mob_brg").textContent = t("mob_brg");
+    $("t_radius").textContent = t("radius");
+    $("t_anchor_point").textContent = t("anchor_point");
+    $("t_anchor_dist").textContent = t("anchor_dist");
+    $("t_anchor_status").textContent = t("anchor_status");
+    $("t_settings").textContent = t("settings");
+    $("t_saved").textContent = t("saved");
+    $("t_sound").textContent = t("sound");
+    $("t_vibe").textContent = t("vibe");
+    $("t_log").textContent = t("log");
+    $("t_privacy").textContent = t("privacy");
+    $("t_log_title").textContent = t("log_title");
+
+    $("btnStartGPS").textContent = t("gps_start");
+    $("btnStopGPS").textContent = t("gps_stop");
+    $("btnCompass").textContent = t("compass_enable");
+    $("btnMOB").textContent = t("mob_mark");
+    $("btnClearMOB").textContent = t("mob_clear");
+    $("btnAnchorSet").textContent = t("anchor_set");
+    $("btnAnchorClear").textContent = t("anchor_clear");
+    $("btnTestAlarm").textContent = t("test_alarm");
+    $("btnStopAlarm").textContent = t("stop_alarm");
+    $("btnExport").textContent = t("export");
+    $("btnClearLog").textContent = t("clear_log");
+    $("pillOffline").textContent = t("offline_ready");
+
+    $("btnLang").textContent = state.lang.toUpperCase();
+    $("copyright").innerHTML = `© <span id="yy"></span> ${t("app")}. ${t("for_training")}`;
+    $("yy").textContent = new Date().getFullYear();
+
+    // refresh status text
+    updateOverallStatus();
+    renderLog();
+  }
+
+  // -----------------------------
+  // Install prompt (PWA)
+  // -----------------------------
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    $("btnInstall").style.display = "inline-block";
+    $("btnInstall").textContent = t("install");
+  });
+
+  $("btnInstall").addEventListener("click", async () => {
+    try{
+      if (!deferredPrompt){
+        alert(t("install_hint"));
+        return;
+      }
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      $("btnInstall").style.display = "none";
+    } catch(_) {}
+  });
+
+  // -----------------------------
+  // Wire UI
+  // -----------------------------
+  $("btnStartGPS").addEventListener("click", startGPS);
+  $("btnStopGPS").addEventListener("click", stopGPS);
+  $("btnCompass").addEventListener("click", enableCompass);
+
+  $("btnMOB").addEventListener("click", () => {
+    if (!state.lastPos) return;
+    setMOB();
+    // strong attention
+    beepOnce(); vibratePattern();
+  });
+  $("btnClearMOB").addEventListener("click", clearMOB);
+
+  $("btnAnchorSet").addEventListener("click", () => {
+    if (!state.lastPos) return;
+    setAnchor();
+  });
+  $("btnAnchorClear").addEventListener("click", clearAnchor);
+
+  $("rad").addEventListener("input", (e) => {
+    state.radiusM = clamp(+e.target.value, 10, 200);
+    $("radVal").textContent = state.radiusM;
+    save();
+    if (state.anchor && state.lastPos) updateAnchor();
+  });
+
+  $("btnTestAlarm").addEventListener("click", () => {
+    beepOnce(); vibratePattern();
+    logEvent("TEST", "Alarm test");
+    flash("warn");
+  });
+
+  $("btnStopAlarm").addEventListener("click", stopAlarm);
+
+  $("setSound").addEventListener("change", (e) => { state.settings.sound = !!e.target.checked; save(); });
+  $("setVibe").addEventListener("change", (e) => { state.settings.vibe = !!e.target.checked; save(); });
+  $("setLog").addEventListener("change", (e) => {
+    state.settings.log = !!e.target.checked;
+    save();
+    if (!state.settings.log) $("logBox").textContent = t("log_off");
+  });
+
+  $("btnExport").addEventListener("click", exportCSV);
+  $("btnClearLog").addEventListener("click", () => {
+    state.log = [];
+    save();
+    renderLog();
+  });
+
+  $("btnLang").addEventListener("click", () => {
+    state.lang = (state.lang === "en") ? "fr" : "en";
+    save();
+    applyLang();
+  });
+
+  // -----------------------------
+  // Init
+  // -----------------------------
+  load();
+  $("rad").value = state.radiusM;
+  $("radVal").textContent = state.radiusM;
+
+  $("setSound").checked = !!state.settings.sound;
+  $("setVibe").checked = !!state.settings.vibe;
+  $("setLog").checked = !!state.settings.log;
+
+  renderMOB();
+  renderAnchor();
+  renderLog();
+
+  applyLang();
+  $("alarmState").textContent = t("alarm_off");
+  $("gpsState").textContent = t("gps_stopped");
+
+  // Auto-register SW
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
