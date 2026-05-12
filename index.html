@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Boater Safety App v1.9 GPS Only + NOAA</title>
+<style>
+:root{--bg:#071a2f;--panel:#0d2948;--text:#f4fbff;--muted:#a9c2d8;--accent:#46d4ff;--good:#33d17a;--warn:#ffd166;--bad:#ff5c5c;--button:#184b7a;--button2:#236ca8}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#061526,#0b2746);color:var(--text)}
+body.night{background:#120000;color:#ffd8d8}
+header{position:sticky;top:0;z-index:20;padding:12px 14px;background:rgba(3,14,26,.92);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.12)}
+h1{font-size:20px;margin:0 0 4px}.sub{font-size:12px;color:var(--muted)}
+.wrap{padding:12px;max-width:980px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:rgba(13,41,72,.92);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+body.night .card{background:#220000;border-color:#5b2020}
+.card h2{font-size:17px;margin:0 0 10px;color:#dff6ff}
+button,input,textarea{font:inherit;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:var(--button);color:var(--text);padding:10px 12px;min-height:44px}
+button{cursor:pointer;font-weight:650}button:hover{background:var(--button2)}button:disabled{opacity:.55}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:var(--button);color:var(--text);padding:10px 12px;min-height:44px;font-weight:650}
+a.btn:hover{background:var(--button2)}
+input,textarea{width:100%;background:#08213a}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.stack{display:flex;flex-direction:column;gap:8px}
+.big{font-size:34px;font-weight:800;letter-spacing:.5px}.small{font-size:13px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.1);font-size:13px}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.full{grid-column:1/-1}.danger{background:#8c1d1d}.danger:hover{background:#b32626}.ok{background:#167046}.ok:hover{background:#1b8a56}
+.light{display:none;position:fixed;inset:0;z-index:99;background:white;color:black;align-items:center;justify-content:center;font-size:52px;font-weight:900;text-align:center}
+.light.on{display:flex}.light.dark{background:#000;color:#fff}.light.red{background:#b00000;color:#fff}.light.red.dark{background:#000;color:#b00000}
+.footer{padding:18px;text-align:center;color:var(--muted);font-size:12px}
+details{background:rgba(255,255,255,.08);border-radius:12px;padding:10px}
+summary{cursor:pointer;font-weight:750}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table td,.table th{border-bottom:1px solid rgba(255,255,255,.12);padding:6px;text-align:left}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Boater Safety App v1.9 GPS Only + NOAA</h1>
+  <div class="sub" id="subtitle">Offline safety helper • GPS course • MOB • waypoints • VHF helper • NOAA compass links • no phone compass sensor</div>
+</header>
+
+<div class="wrap">
+  <div class="row" style="margin-bottom:12px">
+    <button id="langBtn">FR</button>
+    <button id="nightBtn">Night Mode</button>
+    <button id="readmeBtn">README</button>
+    <span class="pill">© 2026 Glen Carruthers</span>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2 id="gpsTitle">GPS / Vessel Movement</h2>
+      <div class="stack">
+        <button class="ok" id="gpsBtn">Start GPS</button>
+        <div><span class="small" id="posLabel">Position</span><div id="pos" class="big">--</div></div>
+        <div class="row">
+          <span class="pill">SOG: <b id="sog">--</b></span>
+          <span class="pill">COG: <b id="cog">--</b></span>
+          <span class="pill">Accuracy: <b id="acc">--</b></span>
+        </div>
+        <div class="small" id="moving">Motion: unknown</div>
+        <div class="small">COG means course-over-ground. It becomes useful only when the vessel is moving.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>GPS Course Display</h2>
+      <div class="stack">
+        <div class="big" id="courseBig">--</div>
+        <div class="small">No phone compass sensor is used in this version.</div>
+        <div class="row">
+          <span class="pill">Heading source: <b>GPS only</b></span>
+          <span class="pill">Best when moving</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>NOAA Compass / Declination</h2>
+      <div class="stack">
+        <div class="small">Use NOAA tools to check magnetic declination/variation for your location.</div>
+        <a class="btn" href="https://www.ngdc.noaa.gov/geomag/calculators/mobileCompass.shtml" target="_blank" rel="noopener">Open NOAA Mobile Compass Tool</a>
+        <a class="btn" href="https://www.ngdc.noaa.gov/geomag-web/" target="_blank" rel="noopener">Open NOAA Geomagnetic Calculator</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Return to MOB</h2>
+      <div class="stack">
+        <button class="danger" id="markMobBtn">MARK MOB NOW</button>
+        <button id="clearMobBtn">Clear MOB</button>
+        <div class="big" id="mobBearing">--</div>
+        <div class="small" id="mobInfo">No MOB point marked.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>VHF Distress Helper</h2>
+      <div class="stack">
+        <button class="danger" id="vhfBtn">Show MAYDAY Script</button>
+        <div id="vhfText" class="small" style="white-space:pre-wrap;display:none"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Fog Mode</h2>
+      <div class="stack">
+        <button id="fogBtn">Toggle Big Digits</button>
+        <div id="fogPanel" style="display:none">
+          <div class="big">SOG <span id="fogSog">--</span></div>
+          <div class="big">COG <span id="fogCog">--</span></div>
+          <div class="big">MOB <span id="fogMob">--</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Emergency Light / SOS</h2>
+      <div class="stack">
+        <div class="small">Caution: flashing light may bother some people. Use only when appropriate.</div>
+        <div class="row">
+          <button id="whiteLightBtn">Steady White Light</button>
+          <button class="danger" id="redLightBtn">Steady Red Light</button>
+        </div>
+        <div class="row">
+          <button id="whiteSosBtn">White SOS Morse</button>
+          <button class="danger" id="redSosBtn">Red SOS Morse</button>
+        </div>
+        <button id="stopLightBtn">Stop Light</button>
+        <div class="small">SOS pattern: 3 short flashes, 3 long flashes, 3 short flashes.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Float Plan + Timer</h2>
+      <div class="stack">
+        <input id="floatName" placeholder="Trip / vessel name" />
+        <textarea id="floatNotes" rows="4" placeholder="Destination, people aboard, emergency contact, route notes"></textarea>
+        <div class="row">
+          <input id="timerMin" type="number" min="1" value="60" style="width:110px" />
+          <button id="startTimerBtn">Start Overdue Timer</button>
+          <button id="stopTimerBtn">Stop</button>
+        </div>
+        <div class="big" id="timerDisplay">--:--</div>
+        <button id="savePlanBtn">Save Float Plan</button>
+      </div>
+    </section>
+
+    <section class="card full">
+      <h2>Waypoints</h2>
+      <div class="row">
+        <input id="wpName" placeholder="Waypoint name: hazard, dock, safe harbour" style="flex:1;min-width:220px" />
+        <button id="addWpBtn">Mark Current Position</button>
+        <button id="exportWpBtn">Export CSV</button>
+        <button id="clearWpBtn">Clear</button>
+      </div>
+      <table class="table" style="margin-top:10px">
+        <thead><tr><th>Name</th><th>Lat</th><th>Lon</th><th>Time</th></tr></thead>
+        <tbody id="wpBody"></tbody>
+      </table>
+    </section>
+
+    <section class="card full" id="readme" style="display:none">
+      <h2>README</h2>
+      <details open>
+        <summary>Important notes</summary>
+        <p>This app is a helper only. It does not replace official charts, a marine compass, VHF radio, GPS plotter, navigation training, or local boating rules.</p>
+        <p>This version intentionally removes the phone compass sensor because phone compass readings can be unreliable near metal, speakers, magnets, engines, wiring, or some phone cases.</p>
+      </details>
+      <details>
+        <summary>NOAA tools</summary>
+        <p>The NOAA links open online tools for magnetic declination/variation and mobile compass information. They require internet access.</p>
+      </details>
+      <details>
+        <summary>GPS permission</summary>
+        <p>GPS usually requires Location permission and may require the app to be opened from an HTTPS page. If GPS is denied, check Chrome Location permission and reload the app.</p>
+      </details>
+    </section>
+  </div>
+</div>
+
+<div class="light" id="light">SOS</div>
+<div class="footer">Boater Safety App v1.9 GPS Only + NOAA • © 2026 Glen Carruthers. All rights reserved.</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const state = {
+    lang:'en', lat:null, lon:null, sog:null, cog:null, gpsOn:false,
+    mob:null, waypoints:JSON.parse(localStorage.getItem('waypoints_v18')||'[]'),
+    timer:null, timerEnd:null, lightTimer:null, lightStep:0
+  };
+
+  const tx = {
+    en:{title:'Boater Safety App v1.9 GPS Only + NOAA',subtitle:'Offline safety helper • GPS course • MOB • waypoints • VHF helper • NOAA compass links • no phone compass sensor',gps:'GPS / Vessel Movement',startGps:'Start GPS',pos:'Position',night:'Night Mode'},
+    fr:{title:'Application sécurité nautique v1.9 GPS + NOAA',subtitle:'Aide hors ligne • route GPS • MOB • points • aide VHF • liens NOAA • sans compas du téléphone',gps:'GPS / Mouvement du bateau',startGps:'Démarrer GPS',pos:'Position',night:'Mode nuit'}
+  };
+
+  function t(){return tx[state.lang]}
+  function applyLang(){
+    $('title').textContent=t().title; $('subtitle').textContent=t().subtitle; $('gpsTitle').textContent=t().gps;
+    $('gpsBtn').textContent=state.gpsOn?'GPS Running':t().startGps; $('posLabel').textContent=t().pos;
+    $('nightBtn').textContent=t().night; $('langBtn').textContent=state.lang==='en'?'FR':'EN';
+  }
+
+  function deg(n){return Number.isFinite(n) ? Math.round((n+360)%360)+'°' : '--'}
+  function rad(d){return d*Math.PI/180}
+  function bearing(lat1,lon1,lat2,lon2){
+    const y=Math.sin(rad(lon2-lon1))*Math.cos(rad(lat2));
+    const x=Math.cos(rad(lat1))*Math.sin(rad(lat2))-Math.sin(rad(lat1))*Math.cos(rad(lat2))*Math.cos(rad(lon2-lon1));
+    return (Math.atan2(y,x)*180/Math.PI+360)%360;
+  }
+  function distanceM(lat1,lon1,lat2,lon2){
+    const R=6371000, dLat=rad(lat2-lat1), dLon=rad(lon2-lon1);
+    const a=Math.sin(dLat/2)**2+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLon/2)**2;
+    return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
+
+  function updateGpsUI(){
+    $('pos').textContent = state.lat==null ? '--' : state.lat.toFixed(5)+', '+state.lon.toFixed(5);
+    $('sog').textContent = Number.isFinite(state.sog) ? (state.sog*1.94384).toFixed(1)+' kt' : '--';
+    $('cog').textContent = deg(state.cog);
+    $('courseBig').textContent = deg(state.cog);
+    $('fogSog').textContent = $('sog').textContent;
+    $('fogCog').textContent = $('cog').textContent;
+    $('moving').textContent = Number.isFinite(state.sog) ? (state.sog>0.7?'Motion: moving':'Motion: slow/stationary') : 'Motion: unknown';
+    updateMob();
+  }
+
+  $('gpsBtn').onclick=()=>{
+    if(!navigator.geolocation){alert('GPS/geolocation is not available in this browser.');return;}
+    navigator.geolocation.watchPosition(pos=>{
+      state.lat=pos.coords.latitude; state.lon=pos.coords.longitude;
+      state.sog=Number.isFinite(pos.coords.speed)?pos.coords.speed:null;
+      state.cog=Number.isFinite(pos.coords.heading)?pos.coords.heading:null;
+      $('acc').textContent = Math.round(pos.coords.accuracy||0)+' m';
+      updateGpsUI();
+    }, err=>{
+      let msg='GPS error: '+err.message;
+      if(err.code===1) msg='GPS permission denied. Allow Location in browser settings, reload, then press Start GPS again. If opened as a local file, use an HTTPS page.';
+      alert(msg);
+    }, {enableHighAccuracy:true, maximumAge:1000, timeout:15000});
+    state.gpsOn=true; $('gpsBtn').textContent='GPS Running';
+  };
+
+  $('markMobBtn').onclick=()=>{
+    if(state.lat==null){alert('Start GPS first.');return;}
+    state.mob={lat:state.lat,lon:state.lon,time:new Date().toLocaleString()};
+    updateMob();
+  };
+  $('clearMobBtn').onclick=()=>{state.mob=null; updateMob();}
+  function updateMob(){
+    if(!state.mob){$('mobBearing').textContent='--'; $('mobInfo').textContent='No MOB point marked.'; $('fogMob').textContent='--'; return;}
+    if(state.lat==null){$('mobInfo').textContent='MOB marked. Start GPS to navigate back.'; return;}
+    const b=bearing(state.lat,state.lon,state.mob.lat,state.mob.lon);
+    const d=distanceM(state.lat,state.lon,state.mob.lat,state.mob.lon);
+    $('mobBearing').textContent='Steer '+deg(b);
+    $('fogMob').textContent=deg(b);
+    $('mobInfo').textContent='Distance '+(d<1000?Math.round(d)+' m':(d/1852).toFixed(2)+' nm')+' • marked '+state.mob.time;
+  }
+
+  $('vhfBtn').onclick=()=>{
+    const p = state.lat==null ? 'Position: state your location as clearly as possible.' : 'Position: '+state.lat.toFixed(5)+', '+state.lon.toFixed(5);
+    $('vhfText').style.display='block';
+    $('vhfText').textContent =
+`MAYDAY, MAYDAY, MAYDAY
+This is [vessel name] [repeat 3 times]
+${p}
+Nature of distress: [fire / sinking / medical / aground / MOB]
+People aboard: [number]
+Description of vessel: [type, colour, length]
+Need immediate assistance.
+Over.`;
+  };
+
+  $('fogBtn').onclick=()=>{$('fogPanel').style.display=$('fogPanel').style.display==='none'?'block':'none';};
+  $('nightBtn').onclick=()=>document.body.classList.toggle('night');
+  $('readmeBtn').onclick=()=>{$('readme').style.display=$('readme').style.display==='none'?'block':'none';};
+  $('langBtn').onclick=()=>{state.lang=state.lang==='en'?'fr':'en'; applyLang();};
+
+  function lightOff(){
+    clearTimeout(state.lightTimer);
+    state.lightTimer=null;
+    $('light').classList.remove('on','dark','red');
+    $('light').textContent='SOS';
+  }
+
+  function steadyLight(color){
+    lightOff();
+    $('light').classList.add('on');
+    if(color==='red') $('light').classList.add('red');
+    $('light').textContent = color==='red' ? 'RED FLASH' : 'WHITE FLASH';
+
+    let on = true;
+    function flash(){
+      $('light').classList.toggle('dark', !on);
+      on = !on;
+      state.lightTimer = setTimeout(flash, 450);
+    }
+    flash();
+  }
+
+  function startMorseSOS(color){
+    lightOff();
+    const unit = 220;
+    const pattern = [
+      1,1,1,0, 1,1,1,0, 1,1,1,0,
+      3,1,3,0, 3,1,3,0, 3,1,3,0,
+      1,1,1,0, 1,1,1,0, 1,1,1,0,
+      0,0,0,0,0,0,0
+    ];
+    let i = 0;
+    $('light').classList.add('on');
+    if(color==='red') $('light').classList.add('red');
+    $('light').textContent = 'SOS';
+    function step(){
+      const val = pattern[i % pattern.length];
+      const isOn = val > 0;
+      $('light').classList.toggle('dark', !isOn);
+      state.lightTimer = setTimeout(step, (isOn ? val : 1) * unit);
+      i++;
+    }
+    step();
+  }
+
+  $('whiteLightBtn').onclick=()=>steadyLight('white');
+  $('redLightBtn').onclick=()=>steadyLight('red');
+  $('whiteSosBtn').onclick=()=>startMorseSOS('white');
+  $('redSosBtn').onclick=()=>startMorseSOS('red');
+  $('stopLightBtn').onclick=lightOff;
+  $('light').onclick=lightOff;
+
+  function tickTimer(){
+    if(!state.timerEnd){$('timerDisplay').textContent='--:--';return;}
+    const ms=state.timerEnd-Date.now();
+    if(ms<=0){$('timerDisplay').textContent='OVERDUE';$('timerDisplay').className='big bad';return;}
+    const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
+    $('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  $('startTimerBtn').onclick=()=>{
+    const min=Math.max(1,Number($('timerMin').value||60));
+    state.timerEnd=Date.now()+min*60000;
+    clearInterval(state.timer); state.timer=setInterval(tickTimer,1000); tickTimer();
+  };
+  $('stopTimerBtn').onclick=()=>{clearInterval(state.timer);state.timerEnd=null;tickTimer();};
+  $('savePlanBtn').onclick=()=>{
+    localStorage.setItem('floatPlan_v18',JSON.stringify({name:$('floatName').value,notes:$('floatNotes').value,timerMin:$('timerMin').value}));
+    alert('Float plan saved on this device.');
+  };
+
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function renderWp(){
+    $('wpBody').innerHTML=state.waypoints.map(w=>`<tr><td>${escapeHtml(w.name)}</td><td>${w.lat.toFixed(5)}</td><td>${w.lon.toFixed(5)}</td><td>${escapeHtml(w.time)}</td></tr>`).join('');
+  }
+  $('addWpBtn').onclick=()=>{
+    if(state.lat==null){alert('Start GPS first.');return;}
+    state.waypoints.push({name:$('wpName').value||'Waypoint',lat:state.lat,lon:state.lon,time:new Date().toLocaleString()});
+    localStorage.setItem('waypoints_v18',JSON.stringify(state.waypoints)); $('wpName').value=''; renderWp();
+  };
+  $('clearWpBtn').onclick=()=>{if(confirm('Clear all waypoints?')){state.waypoints=[];localStorage.setItem('waypoints_v18','[]');renderWp();}};
+  $('exportWpBtn').onclick=()=>{
+    const csv='Name,Latitude,Longitude,Time\n'+state.waypoints.map(w=>`"${String(w.name).replaceAll('"','""')}",${w.lat},${w.lon},"${w.time}"`).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'}), a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='boater_waypoints.csv'; a.click(); URL.revokeObjectURL(a.href);
+  };
+
+  const savedPlan=JSON.parse(localStorage.getItem('floatPlan_v18')||'{}');
+  if(savedPlan.name) $('floatName').value=savedPlan.name;
+  if(savedPlan.notes) $('floatNotes').value=savedPlan.notes;
+  if(savedPlan.timerMin) $('timerMin').value=savedPlan.timerMin;
+  renderWp(); applyLang();
+})();
+</script>
+</body>
+</html>
